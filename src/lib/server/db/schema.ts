@@ -23,7 +23,7 @@ export const session = pgTable('session', {
 	expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull()
 });
 
-export const inventory = pgTable('inventory', {
+export const inventoryTable = pgTable('inventory', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull()
 });
@@ -36,7 +36,7 @@ export const user_inventory_link = pgTable(
 			.references(() => user.id),
 		inventoryId: text('inventory_id')
 			.notNull()
-			.references(() => inventory.id)
+			.references(() => inventoryTable.id)
 	},
 	(table) => {
 		return {
@@ -49,7 +49,7 @@ export const items = pgTable('items', {
 	id: text('id').notNull().primaryKey(),
 	inventoryId: text('inventory_id')
 		.notNull()
-		.references(() => inventory.id),
+		.references(() => inventoryTable.id),
 	name: text('name').notNull(),
 	amount: integer('amount').$default(() => 0),
 	desiredAmount: integer('desired_amount').$default(() => 0)
@@ -58,5 +58,7 @@ export const items = pgTable('items', {
 export type Session = typeof session.$inferSelect;
 
 export type User = typeof user.$inferSelect;
+
+export type inventory = typeof inventoryTable.$inferSelect;
 
 export type Item = typeof items.$inferSelect;
