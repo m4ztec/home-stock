@@ -5,7 +5,13 @@
 	let { data }: { data: PageServerData } = $props();
 </script>
   
-<button>Add Inventory</button>
+<form method="post" action="?/create">
+	<label>
+		Name
+		<input name="name" />
+	</label>
+	<button>create inventory</button>
+</form>
 
 <Table hoverable={true}>
     <TableHead>
