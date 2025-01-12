@@ -13,6 +13,8 @@
 	<button>create inventory</button>
 </form>
 
+<div class="hi">{data.post}</div>
+
 <Table hoverable={true}>
     <TableHead>
         <TableHeadCell class="!p-4">

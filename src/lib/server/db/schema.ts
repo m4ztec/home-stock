@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm';
 import {
 	pgTable,
 	serial,
@@ -5,7 +6,9 @@ import {
 	integer,
 	timestamp,
 	numeric,
-	primaryKey
+	primaryKey,
+	PgUUID,
+	uuid
 } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
@@ -24,30 +27,30 @@ export const session = pgTable('session', {
 });
 
 export const inventoryTable = pgTable('inventory', {
-	id: text('id').primaryKey(),
+	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull()
 });
 
-export const user_inventory_link = pgTable(
+export const inventory_link = pgTable(
 	'inventory_link',
 	{
+		inventoryId: uuid('inventory_id')
+			.notNull()
+			.references(() => inventoryTable.id),
 		userId: text('user_id')
 			.notNull()
-			.references(() => user.id),
-		inventoryId: text('inventory_id')
-			.notNull()
-			.references(() => inventoryTable.id)
+			.references(() => user.id)
 	},
 	(table) => {
 		return {
-			pk: primaryKey({ columns: [table.userId, table.inventoryId] })
+			pk: primaryKey({ columns: [ table.inventoryId, table.userId ]})
 		};
 	}
 );
 
 export const items = pgTable('items', {
-	id: text('id').notNull().primaryKey(),
-	inventoryId: text('inventory_id')
+	id: uuid('id').notNull().primaryKey(),
+	inventoryId: uuid('inventory_id')
 		.notNull()
 		.references(() => inventoryTable.id),
 	name: text('name').notNull(),
@@ -59,6 +62,22 @@ export type Session = typeof session.$inferSelect;
 
 export type User = typeof user.$inferSelect;
 
-export type inventory = typeof inventoryTable.$inferSelect;
-
 export type Item = typeof items.$inferSelect;
+
+export type Inventory = typeof inventoryTable.$inferSelect;
+
+//RELATIONS
+
+export const inventoryLinkRelations = relations(inventory_link, ({one}) => {
+	return {
+		user: one(user, {
+			fields: [inventory_link.userId],
+			references: [user.id]
+		}),
+		inventory: one(inventoryTable, {
+			fields: [inventory_link.inventoryId],
+			references: [inventoryTable.id]
+		})
+	}
+})
+
